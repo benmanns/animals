@@ -21,6 +21,12 @@ idx = zeros(size(X,1), 1);
 % Note: You can use a for-loop over the examples to compute this.
 %
 
+results = zeros(rows(X), rows(centroids));
+for i = 1:columns(X)
+  results += (repmat(X(:, i), 1, rows(centroids)) - repmat(centroids(:, i)', rows(X), 1)) .^ 2;
+end
+
+[distances idx] = min(results');
 
 
 
