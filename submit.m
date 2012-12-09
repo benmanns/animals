@@ -14,6 +14,12 @@ function submit(partId, webSubmit)
 
   % Check valid partId
   partNames = validParts();
+
+  % If partId is set to -1, submit all parts.
+  if partId == -1
+    partId = numel(partNames) + 1;
+  end
+
   if ~isValidPartId(partId)
     fprintf('!! Invalid homework part selected.\n');
     fprintf('!! Expected an integer from 1 to %d.\n', numel(partNames) + 1);
@@ -21,7 +27,9 @@ function submit(partId, webSubmit)
     return
   end
 
-  if ~exist('ml_login_data.mat','file')
+  if loginEnv()
+    [login password] = loginEnv();
+  elseif ~exist('ml_login_data.mat','file')
     [login password] = loginPrompt();
     save('ml_login_data.mat','login','password');
   else  
@@ -158,7 +166,11 @@ end
 
 % ***************** REMOVE -staging WHEN YOU DEPLOY *********************
 function url = site_url()
-  url = 'http://class.coursera.org/ml-2012-002';
+  if getenv('ML_SITE_URL')
+    url = getenv('ML_SITE_URL');
+  else
+    url = 'http://class.coursera.org/ml-2012-002';
+  end
 end
 
 function url = challenge_url()
@@ -260,6 +272,15 @@ function [result, str] = submitSolution(email, ch_resp, part, output, ...
 end
 
 % =========================== LOGIN HELPERS ===========================
+
+function [login password] = loginEnv()
+  login = getenv('ML_LOGIN');
+  password = getenv('ML_PASSWORD');
+
+  if isempty(login) || isempty(password)
+    login = password = [];
+  end
+end
 
 function [login password] = loginPrompt()
   % Prompt for password
